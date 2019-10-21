@@ -78,11 +78,18 @@ def message(text,emitter):
             dest.send(text)
             print ("a message was sent")
 
+def name(name,usrskt):
+   print("later") 
+
 #------------------------------------------------------------------------------
 #These functions here only use one parameter, and it's the recipient
-def helpu(recipient): # *others lets you store additionnal arguments, but we'll use a try catch approach instead
+def helpnote(recipient): 
+    # *others lets you store additionnal arguments, but we'll use a try catch approach instead
     recipient.send(("lorem ipsum blablablah\n").encode("utf-8"))
-
+def channels(recipient):
+    recipient.send(("lorem ipsum blablablah\n").encode("utf-8"))
+def users(recipient):
+    recipient.send(("lorem ipsum blablablah\n").encode("utf-8"))
 #-------------------------------------------------------------------------------
 def parse(text,recipient,chatfuncs):
     s = text.decode("utf-8")
@@ -94,15 +101,18 @@ def parse(text,recipient,chatfuncs):
             chatfuncsag[s](recipient)
             print("Command ", chatfuncsag[s]," was called")
         else :
-            print("Unknown command called : ",s)
+            print("Failed Command Call : ",s)
             notiferr(recipient)
     else :
         cmd = s[:space]
         if cmd in chatfuncs :
-            chatfuncs[cmd](s[space+1:],recipient)
+            try :
+                chatfuncs[cmd](s[space+1:],recipient)
+            except Exception as err :
+                recipient.send(("incorrect use of "+cmd+" either it does not take arguments, or it failed somehow!\n").encode("utf-8"))
             print(chatfuncs[cmd]," was called")
         else :
-            print("Unknown command called : ",cmd)
+            print("Failed Command Call : ",cmd)
             notifunkn(recipient,cmd)
         #prints invoked command name in the console
         #print(s[:space])
@@ -114,10 +124,11 @@ def notifunkn(recipient,cmd):
     recipient.send((cmd + " is not a known command, try HELP\n").encode("utf-8"))
 #-------------------------------------------------------------------------------
 #all the chat functions, 0 means not implemented yet
-chatfuncs = {"MSG" : message, "NICK" : 0,"HELP": 0, "LIST" : 0, "KILL" : 0,"CHAN" : 0,"JOIN" : 0,"PART" : 0,"KICK" :0 }
+chatfuncs = {"MSG" : message, "NICK" : 0,"HELP": helpnote, "LIST" : users, "KILL" : 0,"CHAN" : channels,"JOIN" : 0,"PART" : 0,"KICK" :0 }
 #functions using only the "recipient" argument i.e. functions the user calls without argument   
-chatfuncsag = {"HELP": helpu, "LIST" : 0, "CHAN": 0 }
-
+chatfuncsag = {"HELP": helpnote, "LIST" : users, "CHAN": channels }
+#userlist
+users = {}
 #-------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()

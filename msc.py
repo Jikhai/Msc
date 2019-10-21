@@ -8,7 +8,7 @@ import select
 import threading
 
 
-def main(): #tests avec nc localhost 7777
+def main():
 
     #if len(sys.argv) <2 :
         #print ("Usage : [link]")
@@ -31,24 +31,34 @@ def main(): #tests avec nc localhost 7777
 
     lesocket.listen(1)
     
-    
-    while True :
+    clientlist = []
+
+    while True : #tests avec nc localhost 7777
+
+        socklist,list_a,list_b = select.select(clientlist + [lesocket],[],[])    
         
-        established, addr = lesocket.accept()
-        threading.Thread(None, gere_client,"UnClient", (established,)).start()
-        
+        for i in socklist : 
+            if i == lesocket :
+                established, addr = lesocket.accept()
+                clientlist.append(established)
+            else :
+                texte=i.recv(1500)
+                if len(texte) == 0 :
+                    i.close()
+                    clientlist.remove(i)
+                else:
+                    i.send(texte)
+        output = 0
+        #vérification du nombre de sockets ouverts.
+        #for debug in clientlist : output += 1  
+        #print ("------------------------------------\n", output)
     else : lesocket.close()
-        
-def gere_client(established):
 
-    while True :
 
-        texte= established.recv(1500)
-        if len(texte) == 0 :
-            break
-        established.send(texte)
-
-    else : established.close()
+#-------------------------------------------------------------------------------
+if __name__ == "__main__":
+    main()
+    
     """try : 
         liste = socket.getaddrinfo(goal,"http",0,socket.SOCK_STREAM)
     except Exception as err:
@@ -81,6 +91,3 @@ def gere_client(established):
         if lesocket.recv(256) == b'' :
             break
         print(lesocket.recv(256))"""
-
-if __name__ == "__main__":
-    main()
